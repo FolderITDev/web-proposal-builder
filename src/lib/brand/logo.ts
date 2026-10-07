@@ -1,8 +1,8 @@
 import { type BrandLogo } from '@/lib/validation/proposal';
 
 /**
- * Brand marks, described once as primitives in a 40 × 40 box so the HTML preview and
- * the PDF renderer draw exactly the same logo.
+ * Brand marks, described once as primitives in a 40 × 40 box. The preview draws them, and the
+ * document renderer receives the same logo choice with the proposal.
  */
 export type LogoShape =
   | { kind: 'circle'; cx: number; cy: number; r: number; fill?: boolean; strokeWidth?: number }

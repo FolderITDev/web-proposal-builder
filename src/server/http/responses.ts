@@ -30,6 +30,7 @@ const TITLES: Record<number, string> = {
   404: 'Not found',
   413: 'Payload too large',
   415: 'Unsupported media type',
+  503: 'Service unavailable',
   422: 'Validation failed',
   429: 'Too many requests',
   500: 'Internal server error',

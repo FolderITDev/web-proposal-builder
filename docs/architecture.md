@@ -1,6 +1,6 @@
 # Architecture and decisions
 
-Proposal Builder is a Next.js application with its own REST API and PostgreSQL database. Public pages are prerendered; the editor is a client application that talks to the API; PDFs are rendered on the server.
+Proposal Builder is a Next.js application with its own REST API and PostgreSQL database. Public pages are prerendered; the editor is a client application that talks to the API; PDFs come from an external document renderer.
 
 ## Layers
 
@@ -13,7 +13,7 @@ src/lib/api/           browser client        → fetch, Zod-parsed responses, Ap
 src/app/api/           Route Handlers        → parse input, call a service, validate output
 src/server/services/   use cases             → templates, lifecycle, ownership, versions
 src/server/repositories/ data access         → Drizzle queries and transactions, document ↔ rows
-src/server/pdf/        document renderer     → React PDF from the same model and totals
+src/server/document-renderer/ HTTP client   → the only code that knows DOCUMENT_RENDERER_URL
 src/domain/proposal/   pure rules            → money, totals, milestones, status, templates
 PostgreSQL             four tables           → proposals and their ordered child rows
 ```
@@ -46,7 +46,19 @@ PostgreSQL             four tables           → proposals and their ordered chi
 
 ## Documents
 
-`ProposalSheet` renders the HTML document for the preview, the share page and the landing page. `proposal-pdf.tsx` renders the same sections with React PDF, registering the same fonts from WOFF files. Logos are described once as primitives (`logoShapes`) and drawn by both renderers. Line height is set on paragraph styles rather than the page, because React PDF drops absolutely positioned fixed footers that inherit a page line height.
+`ProposalSheet` renders the HTML document for the preview, the share page and the landing page. Logos are described once as primitives (`logoShapes`).
+
+PDFs come from the document renderer, an external service at `DOCUMENT_RENDERER_URL` (with an optional bearer token in `DOCUMENT_RENDERER_API_KEY`). Both PDF routes call `POST /v1/documents` with:
+
+```json
+{
+  "template": "proposal",
+  "format": "pdf",
+  "proposal": { "number": "…", "status": "…", "document": {}, "totals": {} }
+}
+```
+
+`document` and `totals` are the `ProposalDocument` and `Totals` contracts, so the PDF prints the totals the server computed, never a second calculation. IDs and share tokens are never sent. The renderer answers `application/pdf`; the client checks the content type and the `%PDF-` signature and gives up after 20 seconds. Any failure becomes a `503` problem with the code `renderer_unavailable`, and configuration is read on the first render, so the rest of the application works while the renderer is unavailable.
 
 ## Privacy model
 
@@ -60,9 +72,9 @@ Cache Components and Partial Prefetching are enabled. The landing page, template
 
 - Vitest `unit`: money, totals, splits, lifecycle, templates and document validation.
 - Vitest `components`: the sheet, the sub-dial, inputs and badges in jsdom.
-- Vitest `integration`: Route Handlers called with real `Request` objects against PostgreSQL, including PDF rendering.
+- Vitest `integration`: Route Handlers called with real `Request` objects against PostgreSQL, including PDF export against a double of the renderer's API.
 - Playwright: the main flows and axe WCAG 2.2 AA scans against a production build, at desktop and mobile sizes.
 
 ## Deployment
 
-The app is built with `basePath: '/apps/proposal-builder'`. Set `SITE_ORIGIN` to the public origin at build time. The root `robots.txt` of that origin should reference `/apps/proposal-builder/sitemap.xml`. The rate limiter is in process; a multi-instance deployment should move it to a shared store.
+The app is built with `basePath: '/apps/proposal-builder'`. Set `SITE_ORIGIN` to the public origin at build time, and `DOCUMENT_RENDERER_URL` (plus `DOCUMENT_RENDERER_API_KEY` if needed) at runtime. The root `robots.txt` of that origin should reference `/apps/proposal-builder/sitemap.xml`. The rate limiter is in process; a multi-instance deployment should move it to a shared store.

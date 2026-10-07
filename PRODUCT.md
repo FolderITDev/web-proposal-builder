@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Next.js (App Router, Server Components, Route Handlers) · React · strict TypeScript · Tailwind CSS · TanStack Query · React Hook Form + Zod · Drizzle ORM · PostgreSQL (docker compose) · @react-pdf/renderer for server-side PDF · Vitest · Playwright · pnpm. Chosen by the user on 2026-10-06.
+Next.js (App Router, Server Components, Route Handlers) · React · strict TypeScript · Tailwind CSS · TanStack Query · React Hook Form + Zod · Drizzle ORM · PostgreSQL (docker compose) · an external document renderer for PDFs · Vitest · Playwright · pnpm. Chosen by the user on 2026-10-06.
 
 ## Users
 
@@ -19,7 +19,7 @@ Next.js (App Router, Server Components, Route Handlers) · React · strict TypeS
 
 Proposal Builder takes a proposal from blank to a branded, priced document. A dashboard lists proposals by status; the editor walks through client, project, scope, services and pricing, terms and branding, with a live preview beside it that updates on every change. Work autosaves. The finished proposal exports to PDF and has a shareable read-only page.
 
-It also shows, in public, how Folder IT builds business software: complex forms, derived calculations, autosave, CRUD over a REST API, server-side document generation and PostgreSQL persistence.
+It also shows, in public, how Folder IT builds business software: complex forms, derived calculations, autosave, CRUD over a REST API, integration with a document rendering service and PostgreSQL persistence.
 
 ## Positioning
 
@@ -35,7 +35,7 @@ The preview is the real document, not an approximation: the same data model and 
 ## Capabilities and Constraints
 
 - Endpoints: `GET/POST /api/proposals`, `GET/PATCH/DELETE /api/proposals/:id`, `POST /api/proposals/:id/duplicate`, `GET /api/proposals/:id/pdf`, `GET /api/share/:token/pdf`.
-- No external APIs or paid services; no real client data in example content; logo marks generated locally.
+- One external service: the document renderer at `DOCUMENT_RENDERER_URL`, which produces the PDFs. No other external APIs; no real client data in example content; logo marks generated locally.
 - Served under `/apps/proposal-builder` (Next.js `basePath`). The landing (`/`) and API reference (`/docs/api`) are indexable; the tool (`/proposals`, `/proposals/[id]`) is `noindex`; share pages (`/p/[token]`) are `noindex, nofollow`.
 - English copy.
 

@@ -44,7 +44,7 @@ const OUTPUTS = [
   ],
   [
     'The PDF',
-    'Rendered on the server from the saved proposal with self-hosted fonts, so it never depends on a print dialog.',
+    'Rendered by the document renderer from the saved proposal and its totals, so it never depends on a print dialog.',
   ],
 ] as const;
 
@@ -85,7 +85,10 @@ const STACK = [
     'REST Route Handlers, Zod validation of every input and output, RFC 9457 errors, OpenAPI 3.1, optimistic concurrency',
   ],
   ['Data', 'PostgreSQL with normalized child tables, Drizzle ORM, versioned SQL migrations'],
-  ['Documents', 'Server-side PDF rendering with React PDF from the same model as the preview'],
+  [
+    'Documents',
+    'PDF rendering through a document rendering service, from the same model and totals as the preview',
+  ],
   [
     'Quality',
     'Strict TypeScript, ESLint, Vitest unit and integration tests, Playwright end-to-end tests, GitHub Actions',
@@ -363,8 +366,8 @@ export default function LandingPage() {
               <p>
                 The team builds and maintains Proposal Builder the way it builds client software:
                 complex validated forms, autosave with concurrency control, exact money handling, a
-                normalized PostgreSQL model, server-side document generation and a documented REST
-                API, with tests at every layer.
+                normalized PostgreSQL model, PDFs from a document rendering service and a documented
+                REST API, with tests at every layer.
               </p>
             </div>
             <div className="flex flex-wrap gap-3 pt-2">

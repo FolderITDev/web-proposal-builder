@@ -45,6 +45,10 @@ Every error is an [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem wit
 
 `429`. More than 30 proposals created from one client in 10 minutes. The `Retry-After` header gives the wait in seconds.
 
+### renderer_unavailable
+
+`503`. The document renderer could not produce the PDF: it is unreachable, timed out or did not return a PDF. Try again later.
+
 ### internal_error
 
 `500`. An unexpected failure. Details are logged on the server, never returned.

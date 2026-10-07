@@ -1,11 +1,22 @@
 import { type Proposal } from '@/lib/validation/proposal';
 
-import { renderProposalPdf } from '../pdf/proposal-pdf';
+import { documentRenderer, DocumentRendererError } from '../document-renderer';
+import { ServiceUnavailableError } from '../errors';
 
-/** Streams a rendered proposal as a downloadable PDF named after its number. */
+/** Renders a proposal through the document renderer and returns it as a downloadable PDF. */
 export async function pdfResponse(proposal: Proposal): Promise<Response> {
-  const pdf = await renderProposalPdf(proposal);
-  return new Response(new Uint8Array(pdf), {
+  let pdf: Uint8Array;
+  try {
+    pdf = await documentRenderer.renderProposalPdf(proposal);
+  } catch (error) {
+    if (!(error instanceof DocumentRendererError)) throw error;
+    console.error('PDF rendering failed', { proposal: proposal.number, error });
+    throw new ServiceUnavailableError(
+      'renderer_unavailable',
+      'The PDF could not be generated right now. Try again in a moment.',
+    );
+  }
+  return new Response(pdf.slice(), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${proposal.number}.pdf"`,

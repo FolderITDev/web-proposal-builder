@@ -180,7 +180,11 @@ export function openApiDocument() {
           operationId: 'getProposalPdf',
           summary: 'Download a proposal as PDF',
           parameters: [path('id', 'Proposal ID.')],
-          responses: { '200': pdf, '404': problem('No visible proposal with this ID.') },
+          responses: {
+            '200': pdf,
+            '404': problem('No visible proposal with this ID.'),
+            '503': problem('The document renderer is not available; try again later.'),
+          },
         },
       },
       '/share/{token}/pdf': {
@@ -189,7 +193,11 @@ export function openApiDocument() {
           operationId: 'getSharedPdf',
           summary: 'Download a shared proposal as PDF',
           parameters: [path('token', 'Share token from the proposal.')],
-          responses: { '200': pdf, '404': problem('No proposal with this share token.') },
+          responses: {
+            '200': pdf,
+            '404': problem('No proposal with this share token.'),
+            '503': problem('The document renderer is not available; try again later.'),
+          },
         },
       },
     },

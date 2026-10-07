@@ -4,9 +4,9 @@ Instructions for anyone, human or AI coding agent, changing this repository. Rea
 
 Proposal Builder is a full-stack web application for writing commercial proposals: client, project, scope, services, pricing, terms and branding, with a live preview, autosave, PDF export and share links. It is built and maintained by Folder IT.
 
-There is no account system, no external API and no email delivery. PostgreSQL stores proposals in normalized tables.
+The document renderer at `DOCUMENT_RENDERER_URL`, which produces the PDFs, is the only external service. There is no account system and no email delivery. PostgreSQL stores proposals in normalized tables.
 
-**Stack:** Next.js 16 (App Router, Cache Components, Route Handlers) · React 19 · TypeScript 6 (strict) · Tailwind CSS 4 · TanStack Query 5 · React Hook Form + Zod 4 · Drizzle ORM · PostgreSQL 17 · React PDF · Vitest · Playwright · pnpm 10 · Node.js 24.
+**Stack:** Next.js 16 (App Router, Cache Components, Route Handlers) · React 19 · TypeScript 6 (strict) · Tailwind CSS 4 · TanStack Query 5 · React Hook Form + Zod 4 · Drizzle ORM · PostgreSQL 17 · Vitest · Playwright · pnpm 10 · Node.js 24.
 
 This version of Next.js has breaking changes from older releases. Read the relevant guide in `node_modules/next/dist/docs/` before using an API.
 
@@ -31,7 +31,7 @@ This version of Next.js has breaking changes from older releases. Read the relev
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `src/app/`                | Routes only: `(marketing)` public pages, `(tool)` noindex tool pages, `p/[token]` share page, `api/` Route Handlers, metadata files. |
 | `src/domain/proposal/`    | Pure rules: money, totals, milestone splitting, status lifecycle, templates.                                                         |
-| `src/server/`             | Server-only: services, repositories and mapping, Drizzle schema and seed, PDF renderer, HTTP helpers, OpenAPI.                       |
+| `src/server/`             | Server-only: services, repositories and mapping, Drizzle schema and seed, document renderer client, HTTP helpers, OpenAPI.           |
 | `src/lib/validation/`     | Zod contracts for every request and response, including the editable document.                                                       |
 | `src/features/proposals/` | Editor sections and inputs, autosave, dashboard, TanStack Query options.                                                             |
 | `src/components/`         | Design system components documented in DESIGN.md.                                                                                    |
@@ -72,7 +72,7 @@ Change `src/server/db/schema.ts`, run `pnpm db:generate`, commit the SQL in `dri
 
 ### R8. One document, many renderers
 
-`ProposalSheet` (HTML) and `proposal-pdf.tsx` (PDF) render the same `ProposalDocument` and `ProposalTotals`. A field added to the document is added to both, in the same order. Logos come from `logoShapes`, shared by both.
+`ProposalSheet` (HTML) renders `ProposalDocument` and `ProposalTotals`; the PDF routes send the same two contracts to the document renderer through `src/server/document-renderer`, and nothing else (never IDs or share tokens). A field added to the document is added to the sheet and documented for the renderer, and the contract double in `tests/support/document-renderer.ts` is updated with the client.
 
 ### R9. Public pages stay indexable and static
 
@@ -88,7 +88,7 @@ Follow [DESIGN.md](DESIGN.md): tokens from `globals.css`, components from `src/c
 
 1. Change the contract in `src/lib/validation` and, for pricing, the domain functions with unit tests first.
 2. Persist through the schema, a migration and `mapping.ts`; expose it through a service and a thin Route Handler, with an integration test against PostgreSQL.
-3. Add the field to the editor section, the HTML sheet and the PDF.
+3. Add the field to the editor section and the HTML sheet, and make sure the renderer receives it.
 4. Design loading, empty, error, read-only and conflict states.
 5. Update the OpenAPI document, DESIGN.md, the README and the landing copy when visible behavior changes.
 

@@ -23,7 +23,7 @@ export const FAQ = [
   {
     question: 'How is the PDF generated?',
     answer:
-      'On the server, with React PDF, from the saved proposal. It uses the same document model and totals as the live preview, with self-hosted fonts, so it does not depend on a browser print dialog.',
+      'By a document rendering service, from the saved proposal. Proposal Builder sends it the same document model and totals the live preview uses, never the share link, so the PDF does not depend on a browser print dialog and its numbers always match the preview.',
   },
   {
     question: 'Who built Proposal Builder?',

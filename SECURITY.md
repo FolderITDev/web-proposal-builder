@@ -16,6 +16,7 @@ This is a static reference repository without a support commitment; reports are 
 - Database constraints guard quantities, prices, rates, shares, colors and ownership independently of the application.
 - Share pages are `noindex, nofollow` and send no referrer.
 - A per-client rate limit applies to proposal creation.
+- The document renderer is called only from the server, with an optional bearer token from `DOCUMENT_RENDERER_API_KEY`. It receives the document and its totals, never IDs or share tokens; its answers must be a PDF, and requests to it time out.
 - Security headers: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` and `Permissions-Policy`. The `X-Powered-By` header is disabled.
 
 ## Dependency advisories

@@ -54,7 +54,7 @@ export function webApplicationJsonLd(): JsonLdObject {
       'Multi-section proposal editor with live preview',
       'Autosave with optimistic concurrency',
       'Exact multi-currency pricing with discounts, tax and milestones',
-      'Server-side PDF export and share links',
+      'PDF export and share links',
       'REST API with OpenAPI 3.1 documentation',
     ],
     softwareHelp: absoluteUrl('/docs/api'),

@@ -63,7 +63,7 @@ This repository holds one of its products: **Proposal Builder**, a full-stack we
 
 - A **full-stack web application**: a public, indexable landing page, a multi-section editor with live preview, a REST API documented with OpenAPI 3.1 and PostgreSQL with migrations.
 - **Complex business forms done carefully**: nested lists, derived money, validation as you type, autosave with optimistic concurrency, a status lifecycle and read-only states.
-- **Exact money handling**: integer cents end to end, one pricing function shared by the browser, the API and the PDF, and payment schedules that add up to the total without losing a cent.
+- **Exact money handling**: integer cents end to end, one pricing function shared by the browser, the API and the PDF request, and payment schedules that add up to the total without losing a cent.
 - Original source code under the MIT license, with self-hosted fonts.
 
 ### What this is not
@@ -79,7 +79,7 @@ This repository holds one of its products: **Proposal Builder**, a full-stack we
 - **Autosave that never overwrites.** Valid changes save about a second after typing stops. Each save carries the version it started from; a save from a stale tab is rejected with 409 and the editor asks to reload instead of overwriting.
 - **Status lifecycle.** Draft → sent → accepted or declined. Only drafts are editable; a sent proposal can return to draft, an accepted one is final.
 - **Exact totals.** Line totals, subtotal, discount, tax and total in integer cents, plus milestone amounts split by largest remainder.
-- **PDF export and share links.** A server-rendered A4 PDF from the saved proposal, and a read-only page behind an unguessable token.
+- **PDF export and share links.** An A4 PDF of the saved proposal from the document rendering service, and a read-only page behind an unguessable token.
 - **Dashboard.** Status tabs with counts, search by title, client or number, sorting by update time, total or number, pagination in the URL, and expiry flags for sent proposals.
 
 ## Screenshots
@@ -93,7 +93,7 @@ This repository holds one of its products: **Proposal Builder**, a full-stack we
   <img src="docs/screenshots/04-pdf.png" width="49%" alt="Second page of an exported PDF: investment table, totals with VAT, payment schedule and terms for a booking platform proposal." />
 </p>
 
-<sub>Captured from a production build of this repository in Chromium at 1440 × 900; the PDF page is rendered by the API.</sub>
+<sub>Captured from a production build of this repository in Chromium at 1440 × 900; the PDF page comes from the document renderer.</sub>
 
 ## Install
 
@@ -101,7 +101,7 @@ Requirements:
 
 - **Node.js 24 or later** (pinned in `.node-version`) and **pnpm 10** (pinned in `packageManager`; `corepack enable` installs it).
 - **Docker** to run PostgreSQL 17 locally, or any PostgreSQL 15+ server.
-- No API keys, accounts or paid services.
+- The base URL of the **document renderer** (and its API key, if it requires one), set as `DOCUMENT_RENDERER_URL` and `DOCUMENT_RENDERER_API_KEY` in `.env`. Without it, everything but the PDF download works, and PDF requests answer `503 renderer_unavailable`.
 
 ```bash
 git clone https://github.com/FolderITDev/web-proposal-builder.git
@@ -156,7 +156,7 @@ REST API (Route Handlers) ── Zod in and out · RFC 9457 problems · 409 on s
 Services ── templates, lifecycle, ownership ──► Domain (money, totals, status, templates)
    │                                   │
    ▼                                   ▼
-Repositories ── Drizzle, transactions   PDF renderer ── React PDF, same model and totals
+Repositories ── Drizzle, transactions   Document renderer ── HTTP, DOCUMENT_RENDERER_URL
    │
    ▼
 PostgreSQL ── proposals + scope items + line items + milestones
@@ -166,21 +166,21 @@ The editor keeps the document in React Hook Form. Every change re-renders the pr
 
 ### Repository layout
 
-| Path                      | What it holds                                                                                                              |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `src/app/(marketing)/`    | Public, indexable pages: the landing page and the API reference.                                                           |
-| `src/app/(tool)/`         | The dashboard, template picker and editor. Marked `noindex`.                                                               |
-| `src/app/p/[token]/`      | The read-only share page. Marked `noindex, nofollow`.                                                                      |
-| `src/app/api/`            | Route Handlers: thin adapters from HTTP to services.                                                                       |
-| `src/domain/proposal/`    | Money, totals, milestone splitting, status lifecycle and templates. No I/O.                                                |
-| `src/server/`             | Server-only: services, repositories, the Drizzle schema and seed, the PDF renderer, HTTP helpers and the OpenAPI document. |
-| `src/lib/validation/`     | Zod contracts shared by the API, the editor and the OpenAPI document.                                                      |
-| `src/features/proposals/` | The editor (sections, inputs, autosave), dashboard and TanStack Query options.                                             |
-| `src/components/`         | The design system: the proposal sheet, the sub-dial, the guilloché, buttons, fields and feedback.                          |
-| `src/content/`            | Example proposals and FAQ copy.                                                                                            |
-| `drizzle/`                | Generated SQL migrations.                                                                                                  |
-| `tests/`, `e2e/`          | Vitest (unit, components, integration) and Playwright with axe.                                                            |
-| `docs/`                   | Architecture, API errors, AI-assisted engineering, font licenses and screenshots.                                          |
+| Path                      | What it holds                                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/(marketing)/`    | Public, indexable pages: the landing page and the API reference.                                                                       |
+| `src/app/(tool)/`         | The dashboard, template picker and editor. Marked `noindex`.                                                                           |
+| `src/app/p/[token]/`      | The read-only share page. Marked `noindex, nofollow`.                                                                                  |
+| `src/app/api/`            | Route Handlers: thin adapters from HTTP to services.                                                                                   |
+| `src/domain/proposal/`    | Money, totals, milestone splitting, status lifecycle and templates. No I/O.                                                            |
+| `src/server/`             | Server-only: services, repositories, the Drizzle schema and seed, the document renderer client, HTTP helpers and the OpenAPI document. |
+| `src/lib/validation/`     | Zod contracts shared by the API, the editor and the OpenAPI document.                                                                  |
+| `src/features/proposals/` | The editor (sections, inputs, autosave), dashboard and TanStack Query options.                                                         |
+| `src/components/`         | The design system: the proposal sheet, the sub-dial, the guilloché, buttons, fields and feedback.                                      |
+| `src/content/`            | Example proposals and FAQ copy.                                                                                                        |
+| `drizzle/`                | Generated SQL migrations.                                                                                                              |
+| `tests/`, `e2e/`          | Vitest (unit, components, integration) and Playwright with axe.                                                                        |
+| `docs/`                   | Architecture, API errors, AI-assisted engineering, font licenses and screenshots.                                                      |
 
 ### API
 
@@ -224,7 +224,7 @@ pnpm db:seed       # replace the example proposals; visitor proposals are untouc
 - **Optimistic concurrency.** A `version` column and a conditional `UPDATE` turn a lost update into an explicit 409. The editor stops autosaving and offers a reload; nothing is silently overwritten.
 - **Normalized lists, whole-document saves.** Child tables keep the data relational and constrained; a save replaces the document's lists inside one transaction, which keeps the API simple for autosave.
 - **Rules on the server.** Status transitions, editability and ownership are enforced by the service, not by the buttons that call it.
-- **Server-rendered documents.** The PDF is rendered with React PDF from the saved proposal, so it does not depend on a browser print dialog, and uses the same fonts as the interface.
+- **Documents from a rendering service.** The PDF routes send the saved document and its computed totals to the document renderer at `DOCUMENT_RENDERER_URL` and check that a PDF comes back. The renderer never receives IDs or share tokens, and an unavailable renderer is a `503` with a stable code, not a broken download.
 - **Restrained motion.** The sub-dial's segments retime with a CSS transition when totals change; switches and segmented controls ease in under 200 ms; reduced motion is respected.
 
 Full rationale: [docs/architecture.md](docs/architecture.md).
@@ -242,7 +242,7 @@ The suites cover:
 
 - **Unit:** money parsing and formatting, line rounding, discount capping, tax, the brief's 40 h / 180 h / 30 h example, milestone splitting without lost cents, status transitions, expiry, numbering, templates and document validation.
 - **Components:** the proposal sheet and its excluded scope, the sub-dial's text alternative, money and percentage inputs, the segmented radio group and status badges.
-- **Integration:** every endpoint through its real Route Handler and PostgreSQL: creation from templates, saving with recomputed totals, 409 on stale versions, the status lifecycle, validation paths, read-only examples, privacy between visitors, filters, search, sorting, pagination, duplication, deletion, PDF rendering by ID and by share token, and the OpenAPI document.
+- **Integration:** every endpoint through its real Route Handler and PostgreSQL: creation from templates, saving with recomputed totals, 409 on stale versions, the status lifecycle, validation paths, read-only examples, privacy between visitors, filters, search, sorting, pagination, duplication, deletion, PDF export by ID and by share token through the renderer's contract (with a test double from `tests/support/document-renderer.ts`), and the OpenAPI document.
 - **End-to-end:** creating, editing and autosaving a proposal and downloading its PDF; duplicating a read-only example; sending a proposal and opening its share link; indexing rules and structured data; and axe WCAG 2.2 AA checks on five pages, at desktop and mobile sizes.
 
 The same checks run in GitHub Actions on every push and pull request ([`.github/workflows/quality.yml`](.github/workflows/quality.yml)), with PostgreSQL as a service container.
@@ -319,9 +319,9 @@ Yes, under the license specified in this repository (see the [LICENSE](LICENSE.m
 </details>
 
 <details>
-<summary>Does this repository call any external LLM or API?</summary>
+<summary>Does this repository call any external API?</summary>
 
-No. The application makes no outbound network requests at runtime: pricing is plain TypeScript, PDFs are rendered on the server, fonts are self-hosted and there is no analytics or third-party service.
+One: the document renderer at `DOCUMENT_RENDERER_URL`, which turns a saved proposal into a PDF. Pricing is plain TypeScript, fonts are self-hosted and there is no analytics or third-party script.
 
 </details>
 
@@ -343,7 +343,7 @@ Through [folderit.net](https://folderit.net).
 
 ## About Folder IT
 
-Folder IT is a software development company focused on building custom web and mobile applications, business platforms and digital products. Proposal Builder is built with the architecture and practices the team uses for client business software: complex validated forms, concurrency-safe autosave, exact money handling, normalized PostgreSQL models, server-side document generation and automated tests at every layer.
+Folder IT is a software development company focused on building custom web and mobile applications, business platforms and digital products. Proposal Builder is built with the architecture and practices the team uses for client business software: complex validated forms, concurrency-safe autosave, exact money handling, normalized PostgreSQL models, integration with a document rendering service and automated tests at every layer.
 
 ## License
 

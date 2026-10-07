@@ -26,7 +26,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 /**
  * The proposal as the client will read it. The editor preview, the share page and the landing
- * page render this component; the PDF renders the same document and totals with react-pdf.
+ * page render this component; the document renderer receives the same document and totals.
  * Brand color is the only color the author controls; everything else stays neutral.
  */
 export function ProposalSheet({ document, totals, number, className }: ProposalSheetProps) {

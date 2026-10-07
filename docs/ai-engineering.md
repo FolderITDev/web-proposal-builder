@@ -9,9 +9,9 @@ Proposal Builder runs no AI inference. AI coding agents are used as development 
 5. **Verify.** Run `pnpm check`, `pnpm format:check`, `pnpm build` and `pnpm test:e2e`. Never report a check as passing unless it ran.
 6. **Data boundaries.** Never give a model real proposals, client data, prices or credentials. The example proposals in this repository contain no real client data for that reason.
 
-## Drafting text with a model (not implemented)
+## Model-assisted drafting
 
-Suggesting a project summary or scope descriptions with a language model is a possible extension, not part of the application. If it is built, it must:
+Any feature that suggests a project summary or scope descriptions with a language model must:
 
 - run on the server with server-side credentials and a per-request budget;
 - produce text only, never amounts, quantities, dates or terms;

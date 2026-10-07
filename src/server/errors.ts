@@ -62,3 +62,10 @@ export class ConflictError extends AppError {
     super('version_conflict', 409, message);
   }
 }
+
+/** A service the request depends on is not available; the client can retry later. */
+export class ServiceUnavailableError extends AppError {
+  constructor(code: string, message: string) {
+    super(code, 503, message);
+  }
+}

@@ -18,6 +18,8 @@ import {
   ProposalSchema,
 } from '@/lib/validation/proposal';
 
+import { renderer } from './setup';
+
 const API = `http://localhost${BASE_PATH}/api`;
 const params = (id: string) => ({ params: Promise.resolve({ id }) });
 
@@ -281,6 +283,9 @@ describe('PDF export', () => {
     expect(response.headers.get('content-disposition')).toContain(`${proposal.number}.pdf`);
     const bytes = new Uint8Array(await response.arrayBuffer());
     expect(new TextDecoder().decode(bytes.subarray(0, 5))).toBe('%PDF-');
+    const sent = renderer?.requests.at(-1);
+    expect(sent?.proposal).toMatchObject({ number: proposal.number, totals: proposal.totals });
+    expect(JSON.stringify(sent)).not.toContain(proposal.shareToken);
 
     const shared = await getSharedPdf(request(`/share/${proposal.shareToken}/pdf`), {
       params: Promise.resolve({ token: proposal.shareToken }),
