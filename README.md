@@ -90,7 +90,7 @@ This repository holds one of its products: **Proposal Builder**, a full-stack we
 </p>
 <p align="center">
   <img src="docs/screenshots/03-dashboard.png" width="49%" alt="Proposals dashboard with status tabs and counts, search, sorting and a table of proposals in several currencies." />
-  <img src="docs/screenshots/04-pdf.png" width="49%" alt="Second page of an exported PDF: the investment table with fixed-fee and day-rate services, subtotal, VAT and total for a booking platform proposal." />
+  <img src="docs/screenshots/04-pdf-investment.png" width="49%" alt="Second page of an exported PDF: the investment table with fixed-fee and day-rate services, subtotal, VAT and total for a booking platform proposal." />
 </p>
 
 <sub>Captured from a production build of this repository in Chromium at 1440 × 900; the PDF page comes from the document renderer.</sub>
