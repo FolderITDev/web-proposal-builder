@@ -77,4 +77,6 @@ Cache Components and Partial Prefetching are enabled. The landing page, template
 
 ## Deployment
 
-The app is built with `basePath: '/apps/proposal-builder'`. Set `SITE_ORIGIN` to the public origin at build time, and `DOCUMENT_RENDERER_URL` (plus `DOCUMENT_RENDERER_API_KEY` if needed) at runtime. The root `robots.txt` of that origin should reference `/apps/proposal-builder/sitemap.xml`. The rate limiter is in process; a multi-instance deployment should move it to a shared store.
+The app is built with `basePath: '/apps/proposal-builder'`. Set `SITE_ORIGIN` to the public origin at build time, and `DOCUMENT_RENDERER_URL` (plus `DOCUMENT_RENDERER_API_KEY` if needed) at runtime. The rate limiter is in process; a multi-instance deployment should move it to a shared store.
+
+Rate limits count requests per client address. Set `TRUSTED_PROXY_HOPS` to the number of reverse proxies in front of the app (default 1): the address is read that many entries from the right of `X-Forwarded-For`, so a client cannot choose its own key by sending the header.
