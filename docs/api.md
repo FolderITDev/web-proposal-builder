@@ -41,9 +41,13 @@ Every error is an [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem wit
 
 `404`. The proposal does not exist, was removed, or belongs to another browser. These cases are deliberately indistinguishable.
 
+### payload_too_large
+
+`413`. The request body is larger than 1 MB, far above the largest valid proposal.
+
 ### rate_limited
 
-`429`. More than 30 proposals created from one client in 10 minutes. The `Retry-After` header gives the wait in seconds.
+`429`. More than 30 proposals created or duplicated, or more than 30 PDFs downloaded, from one client in 10 minutes. The `Retry-After` header gives the wait in seconds.
 
 ### renderer_unavailable
 

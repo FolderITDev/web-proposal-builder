@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { type Problem } from '@/lib/validation/proposal';
 
 import { AppError, RateLimitError, ValidationError } from '../errors';
+import { readBodyBytes } from './body';
 
 const PROBLEM_TYPE_BASE =
   'https://github.com/FolderITDev/web-proposal-builder/blob/main/docs/api.md#';
@@ -74,9 +75,20 @@ export function errorToResponse(error: unknown): Response {
   });
 }
 
-/** Reads a JSON body. An empty body is `undefined`; malformed JSON is a validation error. */
+/** Far above the largest valid request body, so only abuse reaches the limit. */
+const MAX_JSON_BODY_BYTES = 1024 * 1024;
+
+/**
+ * Reads a JSON body of at most 1 MB. An empty body is `undefined`; malformed JSON is a
+ * validation error.
+ */
 export async function readJsonBody(request: Request): Promise<unknown> {
-  const text = await request.text();
+  const bytes = await readBodyBytes(
+    request,
+    MAX_JSON_BODY_BYTES,
+    'The request body is larger than 1 MB.',
+  );
+  const text = new TextDecoder().decode(bytes);
   if (!text.trim()) return undefined;
   try {
     return JSON.parse(text);

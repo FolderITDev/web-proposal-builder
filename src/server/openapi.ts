@@ -183,6 +183,7 @@ export function openApiDocument() {
           responses: {
             '200': pdf,
             '404': problem('No visible proposal with this ID.'),
+            '429': problem('Too many PDF downloads from this client.'),
             '503': problem('The document renderer is not available; try again later.'),
           },
         },
@@ -196,6 +197,7 @@ export function openApiDocument() {
           responses: {
             '200': pdf,
             '404': problem('No proposal with this share token.'),
+            '429': problem('Too many PDF downloads from this client.'),
             '503': problem('The document renderer is not available; try again later.'),
           },
         },
